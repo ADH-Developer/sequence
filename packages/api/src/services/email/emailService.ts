@@ -2,6 +2,7 @@ import App, { AppOptions } from "src/app";
 import AbstractEmailProvider from "./providers/abstractEmailProvider";
 import MailgunEmailProvider from "./providers/mailgunEmailProvider";
 import SendgridEmailProvider from "./providers/sendgridEmailProvider";
+import SmtpEmailProvider from "./providers/smtpEmailProvider";
 import MockEmailProvider from "./providers/mockEmailProvider";
 
 class EmailService {
@@ -15,6 +16,8 @@ class EmailService {
       this.#provider = new MailgunEmailProvider(this.options.mailgun);
     } else if (options?.sendgrid) {
       this.#provider = new SendgridEmailProvider(this.options.sendgrid);
+    } else if (options?.smtp) {
+      this.#provider = new SmtpEmailProvider(this.options.smtp);
     } else {
       this.#provider = new MockEmailProvider();
     }

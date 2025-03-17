@@ -6,11 +6,11 @@ RUN apk add --no-cache libc6-compat
 WORKDIR /app/packages/api
 # Install dependencies
 COPY packages/api/package.json packages/api/yarn.lock ./
-RUN yarn install --frozen-lockfile
+RUN yarn install
 WORKDIR /app/packages/common
 # Install dependencies
 COPY packages/common/package.json packages/common/yarn.lock ./
-RUN yarn install --frozen-lockfile
+RUN yarn install
 
 # Build API
 FROM node:16-alpine AS api-builder
@@ -19,7 +19,7 @@ COPY /packages/api /app/packages/api
 COPY /packages/common /app/packages/common
 COPY --from=base /app/packages/api/node_modules ./node_modules
 COPY --from=base /app/packages/common/node_modules /app/packages/common/node_modules
-RUN yarn build && yarn install --production --ignore-scripts --prefer-offline
+RUN yarn build && yarn install --prefer-offline
 
 # Production image, copy all the files and run next
 FROM node:16-alpine AS runner
@@ -37,7 +37,7 @@ COPY --from=api-builder /app/packages/api/.sequelizerc ./.sequelizerc
 COPY --from=api-builder /app/packages/api/node_modules ./node_modules
 USER nodeuser
 ARG PORT=3000
-ENV NODE_ENV production
-ENV PORT $PORT
+ENV NODE_ENV=production
+ENV PORT=$PORT
 EXPOSE $PORT
 CMD ["yarn", "migrate-and-start"]

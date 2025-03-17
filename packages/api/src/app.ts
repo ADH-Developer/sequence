@@ -48,6 +48,16 @@ export interface AppOptions {
       apiKey: string;
       domain: string;
     };
+    smtp?: {
+      host: string;
+      port: number;
+      secure: boolean;
+      auth: {
+        user: string;
+        pass: string;
+      };
+      fromAddress: string;
+    };
   };
 }
 
