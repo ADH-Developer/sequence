@@ -13,13 +13,19 @@ services:
       - backend
       - frontend
   postgres:
-    image: postgres
+    image: postgres:11
     networks:
       - backend
     ports:
       - "5432:5432"
     expose:
       - 5432
+    environment:
+      POSTGRES_USER: docker
+      POSTGRES_PASSWORD: docker
+      POSTGRES_DB: sequence
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
   redis:
     image: redis
     networks:
@@ -44,3 +50,5 @@ services:
 networks:
   frontend:
   backend:
+volumes:
+  postgres_data:
