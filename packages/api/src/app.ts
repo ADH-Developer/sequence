@@ -202,10 +202,12 @@ class App {
       app: this.expressApplication,
       cors: {
         origin: [
+          process.env.DASHBOARD_URL,
           "https://my.sequence.so",
           "https://dev.sequence.so",
           "http://localhost:8000",
           "http://0.0.0.0:8000",
+          "http://192.168.1.100:8000"
         ],
         credentials: true,
       },
@@ -228,6 +230,7 @@ class App {
           "https://dev.sequence.so",
           "http://localhost:8000",
           "http://0.0.0.0:8000",
+          "http://192.168.1.100:8000"
         ],
         credentials: true,
       })
