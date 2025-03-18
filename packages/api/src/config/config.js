@@ -4,11 +4,11 @@ const useSSL = process.env.DB_SSL === "true";
 
 const dialectOptions = useSSL
   ? {
-      ssl: {
-        require: true,
-        rejectUnauthorized: false,
-      },
-    }
+    ssl: {
+      require: true,
+      rejectUnauthorized: false,
+    },
+  }
   : {};
 
 module.exports = {

@@ -6,11 +6,11 @@ declare type ENVIRONMENT = "test" | "development" | "production";
 const options: SequelizeOptions = {
   dialectOptions: process.env.DB_SSL
     ? {
-        ssl: {
-          require: true,
-          rejectUnauthorized: false,
-        },
-      }
+      ssl: {
+        require: true,
+        rejectUnauthorized: false,
+      },
+    }
     : {},
   logging: process.env.DB_LOGGING === "true" ? console.log : false,
 };

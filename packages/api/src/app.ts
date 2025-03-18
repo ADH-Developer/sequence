@@ -27,6 +27,7 @@ import { basicAuthentication } from "./auth/basic.auth";
 import { GraphQLContextType } from "./graphql";
 import depthLimit from "graphql-depth-limit";
 import { getServers } from "dns";
+import HttpRoutes from "./routes/index";
 
 export interface AppOptions {
   port?: number;
@@ -157,8 +158,20 @@ class App {
   }
   async context(context: ExpressHandler) {
     const req = context.req;
+
+    // Allow unauthenticated access to introspection queries
+    if (req.body && (req.body.operationName === 'IntrospectionQuery' || req.path === '/login' || req.path === '/signup')) {
+      return {
+        models: Models,
+        app: this,
+        repositories: this.repositories,
+        dataLoaders: {},
+      };
+    }
+
     const tokenHeader = req.headers.authorization;
     let user: any;
+
     if (!tokenHeader || tokenHeader.trim() === "") {
       throw new SequenceError(
         "Authentication not supported",
@@ -202,12 +215,10 @@ class App {
       app: this.expressApplication,
       cors: {
         origin: [
-          process.env.DASHBOARD_URL,
           "https://my.sequence.so",
           "https://dev.sequence.so",
           "http://localhost:8000",
           "http://0.0.0.0:8000",
-          "http://192.168.1.100:8000"
         ],
         credentials: true,
       },
@@ -222,21 +233,21 @@ class App {
       app.use(enforce.HTTPS({ trustProtoHeader: true }));
     }
 
-    app.use(
-      cors({
-        origin: [
-          process.env.DASHBOARD_URL,
-          "https://my.sequence.so",
-          "https://dev.sequence.so",
-          "http://localhost:8000",
-          "http://0.0.0.0:8000",
-          "http://192.168.1.100:8000"
-        ],
-        credentials: true,
-      })
-    );
+    const corsOptions = {
+      origin: [
+        process.env.DASHBOARD_URL,
+        "https://my.sequence.so",
+        "https://dev.sequence.so",
+        "http://localhost:8000",
+        "http://0.0.0.0:8000",
+        "http://localhost:3000",
+        "http://0.0.0.0:3000"
+      ],
+      credentials: true,
+    };
 
-    app.options("*", cors());
+    app.use(cors(corsOptions));
+    app.options("*", cors(corsOptions));
 
     app.use(cookieParser(process.env.JWT_SECRET_KEY));
     app.use(express.json());
@@ -263,7 +274,7 @@ class App {
     database.close();
   }
   bootRoutes() {
-    new Routes(this.expressApplication);
+    new HttpRoutes(this.expressApplication);
   }
   bootCron() {
     if (this.#cronService) {

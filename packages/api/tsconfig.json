@@ -10,26 +10,57 @@
     "skipLibCheck": true,
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
-    "lib": ["es2018"],
-    "types": ["node", "mocha"],
+    "lib": [
+      "es2018"
+    ],
+    "types": [
+      "node",
+      "mocha"
+    ],
     "allowJs": true,
     "checkJs": false,
     "resolveJsonModule": true,
     "baseUrl": ".",
     "paths": {
-      "api": ["../api"],
-      "api/*": ["../api/*"],
-      "campaign": ["../common/campaign"],
-      "campaign/*": ["../common/campaign/*"],
-      "common": ["../"],
-      "common/*": ["../common/*"],
-      "filters/*": ["../common/filters/*"],
-      "filters": ["../common/filters"],
-      "ui": ["../ui"],
-      "ui/*": ["../ui/*"],
-      "src/*": ["src/*"]
+      "api": [
+        "../api"
+      ],
+      "api/*": [
+        "../api/*"
+      ],
+      "campaign": [
+        "../common/campaign"
+      ],
+      "campaign/*": [
+        "../common/campaign/*"
+      ],
+      "common": [
+        "../"
+      ],
+      "common/*": [
+        "../common/*"
+      ],
+      "filters/*": [
+        "../common/filters/*"
+      ],
+      "filters": [
+        "../common/filters"
+      ],
+      "ui": [
+        "../ui"
+      ],
+      "ui/*": [
+        "../ui/*"
+      ],
+      "src/*": [
+        "src/*"
+      ]
     },
-    "plugins": [{ "transform": "transformer-module" }]
+    "plugins": [
+      {
+        "transform": "transformer-module"
+      }
+    ]
   },
   "files": [],
   "include": [
@@ -51,6 +82,8 @@
     }
   ],
   "ts-node": {
-    "require": ["tsconfig-paths/register"]
+    "require": [
+      "tsconfig-paths/register"
+    ]
   }
 }

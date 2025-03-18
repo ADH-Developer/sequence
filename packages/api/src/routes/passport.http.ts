@@ -6,6 +6,7 @@ import "src/auth/passport/jwt";
 import JwtConfig from "../config/jwt";
 import User from "src/models/user.model";
 import { signJwt } from "src/utils/signJwt";
+import logger from "src/utils/logger";
 
 interface SignupBody {
   email: string;
@@ -14,6 +15,7 @@ interface SignupBody {
 
 class PassportRoutes {
   constructor(app: Application) {
+    logger.info("[PassportRoutes] Initializing passport routes");
     app.use(passport.initialize());
     app.use(passport.session());
 
@@ -66,6 +68,7 @@ class PassportRoutes {
       );
     }
 
+    logger.info("[PassportRoutes] Registering /login route");
     app.post(
       "/login",
       passport.authenticate("local", { failWithError: true }),
@@ -94,6 +97,7 @@ class PassportRoutes {
       }
     );
 
+    logger.info("[PassportRoutes] Registering /signup route");
     app.post("/signup", async (req, res) => {
       const body = req.body as SignupBody;
 
@@ -140,6 +144,7 @@ class PassportRoutes {
         return res.status(500).json(error);
       }
     });
+    logger.info("[PassportRoutes] Finished initializing passport routes");
   }
 }
 
