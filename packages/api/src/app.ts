@@ -217,9 +217,9 @@ class App {
         origin: [
           "https://my.sequence.so",
           "https://dev.sequence.so",
-          "http://localhost:8000",
-          "http://0.0.0.0:8000",
-        ],
+          process.env.NODE_ENV === "development" ? "http://localhost:8000" : null,
+          process.env.NODE_ENV === "production" ? "http://192.168.1.100:8000" : null,
+        ].filter(Boolean),
         credentials: true,
       },
     });
@@ -238,11 +238,11 @@ class App {
         process.env.DASHBOARD_URL,
         "https://my.sequence.so",
         "https://dev.sequence.so",
-        "http://localhost:8000",
-        "http://0.0.0.0:8000",
-        "http://localhost:3000",
-        "http://0.0.0.0:3000"
-      ],
+        process.env.NODE_ENV === "development" ? "http://localhost:8000" : null,
+        process.env.NODE_ENV === "production" ? "http://192.168.1.100:8000" : null,
+        process.env.NODE_ENV === "development" ? "http://localhost:3000" : null,
+        process.env.NODE_ENV === "production" ? "http://192.168.1.100:3000" : null
+      ].filter(Boolean),
       credentials: true,
     };
 
