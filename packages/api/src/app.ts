@@ -236,12 +236,10 @@ class App {
     const corsOptions = {
       origin: [
         process.env.DASHBOARD_URL,
-        "https://my.sequence.so",
-        "https://dev.sequence.so",
-        process.env.NODE_ENV === "development" ? "http://localhost:8000" : null,
-        process.env.NODE_ENV === "production" ? "http://192.168.1.100:8000" : null,
-        process.env.NODE_ENV === "development" ? "http://localhost:3000" : null,
-        process.env.NODE_ENV === "production" ? "http://192.168.1.100:3000" : null
+        process.env.NODE_ENV === "development" ? process.env.DEV_UI_URL : null,
+        process.env.NODE_ENV === "development" ? process.env.DEV_API_URL : null,
+        process.env.NODE_ENV === "production" ? process.env.PROD_UI_URL : null,
+        process.env.NODE_ENV === "production" ? process.env.PROD_API_URL : null
       ].filter(Boolean),
       credentials: true,
     };

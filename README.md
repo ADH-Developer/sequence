@@ -19,6 +19,9 @@ cd sequence
      
      # In packages/api/
      cp .env.development .env
+     
+     # Start the development environment
+     docker compose up --build
      ```
    
    - For production:
@@ -28,12 +31,10 @@ cd sequence
      
      # In packages/api/
      cp .env.production .env
+     
+     # Start the production environment
+     NODE_ENV=production docker compose up --build
      ```
-
-3. Start the application using Docker Compose:
-```bash
-docker compose up
-```
 
 The application will be available at:
 - UI: http://localhost:8000
@@ -48,28 +49,38 @@ The application will be available at:
 - API URL defaults to `http://localhost:3000`
 - Debug logging enabled
 - Hot reloading enabled
+- Start with: `docker compose up --build`
 
 #### Production Mode
 - Uses `.env.production` settings
-- API URL should be set to your domain: `export NEXT_PUBLIC_API_URL=https://your-domain.com`
-- Set `export NODE_ENV=production`
+- API URL should be set to your domain
 - Optimized builds and disabled development features
+- Start with: `NODE_ENV=production docker compose up --build`
 
 ### Environment Files
 The project uses multiple environment files:
 - `.env.development` - Development settings
 - `.env.production` - Production settings
-- `.env` - Active environment (copy either development or production)
+- `.env` - Active environment (must be copied from either development or production)
 
-Key differences to note:
+Important: Always copy the appropriate .env file before building:
+```bash
+# For development
+cp .env.development .env
+
+# For production
+cp .env.production .env
+```
+
+Key environment variables:
 ```bash
 # Development (.env.development)
 NEXT_PUBLIC_API_URL=http://localhost:3000
 NEXT_PRIVATE_API_URL=http://api:3000
 
 # Production (.env.production)
-NEXT_PUBLIC_API_URL=https://your-domain.com  # Set via environment variable
-NEXT_PRIVATE_API_URL=http://api:3000         # Internal container communication
+NEXT_PUBLIC_API_URL=http://your-domain.com  # Set to your actual domain
+NEXT_PRIVATE_API_URL=http://api:3000        # Internal container communication
 ```
 
 ## Manual Setup
