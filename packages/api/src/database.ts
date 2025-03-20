@@ -1,5 +1,6 @@
 import { Sequelize, SequelizeOptions } from "sequelize-typescript";
 import SequelizeConfig from "./config/config";
+import path from "path";
 
 declare type ENVIRONMENT = "test" | "development" | "production";
 
@@ -13,6 +14,10 @@ const options: SequelizeOptions = {
     }
     : {},
   logging: process.env.DB_LOGGING === "true" ? console.log : false,
+  models: [path.join(__dirname, "models", "*.model.{ts,js}")],
+  modelMatch: (filename, member) => {
+    return filename.substring(0, filename.indexOf('.model')) === member.toLowerCase();
+  }
 };
 
 const config =
@@ -26,9 +31,10 @@ const createSequelize = (...args: any[]) => {
   instance
     .authenticate()
     .then(() => console.log("Sequence: database connection successful"))
-    .catch(() => {
+    .catch((err) => {
       console.log(
-        `Environment variable DB_SSL=true required to connect to this database.`
+        `Environment variable DB_SSL=true required to connect to this database.`,
+        err
       );
     });
   return instance;
