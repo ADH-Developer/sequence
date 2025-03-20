@@ -31,9 +31,6 @@ import FilterNodeExecutor from "./nodes/filterNodeExecutor";
 import FilterCampaignNode from "common/campaign/nodes/filterCampaignNode";
 import ExecutionResult, { ExecutionResultEnum } from "./executionResult";
 import ProductUser from "src/models/productUser.model";
-import { WhereOptions } from 'sequelize';
-import { CampaignNodeStateAttributes } from 'common/campaign/types';
-import { AbstractNodeEvaluator } from './abstractNodeEvaluator';
 
 type EntryNode = AudienceCampaignNode | TriggerCampaignNode;
 
@@ -44,7 +41,7 @@ type EntryNode = AudienceCampaignNode | TriggerCampaignNode;
  * step executed successfully or not.
  *
  */
-export class CampaignNodeEvaluator extends AbstractNodeEvaluator {
+class CampaignNodeEvaluator {
   #app: App;
   graph: CampaignGraph;
   userId: string;
@@ -53,7 +50,6 @@ export class CampaignNodeEvaluator extends AbstractNodeEvaluator {
   edges: CampaignNodeEdge[];
   calledBuild = false;
   constructor(app: App, userId: string, campaignId: string) {
-    super(app, userId, campaignId);
     this.#app = app;
     this.userId = userId;
     this.campaignId = campaignId;
@@ -398,38 +394,46 @@ export class CampaignNodeEvaluator extends AbstractNodeEvaluator {
    * @param campaignNode CampaignNode
    * @returns Date
    */
-  async getRunAt(campaignNode: AbstractCampaignNode): Promise<Date> {
-    if (campaignNode instanceof EmailCampaignNode) {
-      const json = campaignNode.json as EmailCampaignNodeJson;
-
-      // Handle immediate sending
-      if (json.scheduling === 'immediately') {
-        return new Date();
-      }
-
-      // If no distribution config exists, create one
-      if (!json.distributionConfig) {
-        // Generate random peak time between 10 AM and 4 PM
-        const peakHour = Math.floor(Math.random() * (16 - 10)) + 10;
-        const peakMinute = Math.floor(Math.random() * 60);
-
-        // Get the audience size and calculate aggressiveness
-        const audienceSize = await this.getAudienceSize(campaignNode.id);
-
-        json.distributionConfig = {
-          peakTime: { hour: peakHour, minute: peakMinute },
-          aggressiveness: this.calculateAggressiveness(audienceSize)
-        };
-
-        // Save the distribution config
-        await this.saveDistributionConfig(campaignNode, json);
-      }
-
-      // Calculate the distributed time based on the config
-      return await this.calculateDistributedTime(json.distributionConfig);
+  getRunAt(campaignNode: AbstractCampaignNode) {
+    invariant(
+      this.calledBuild,
+      "Need to call CampaignNodeEvaluator.build() first"
+    );
+    if (campaignNode.kind === CampaignNodeKind.Wait) {
+      const waitNode = campaignNode as WaitCampaignNode;
+      const days = waitNode.getDays();
+      const runAt = moment(this.getNow()).add(days, "days");
+      return runAt.toDate();
     }
+    if (campaignNode.kind === CampaignNodeKind.Email) {
+      const emailNode = campaignNode as EmailCampaignNode;
+      const scheduling = emailNode.getScheduling();
+      if (scheduling === CampaignEmailScheduling.Immediately) {
+        return this.getNow();
+      }
+      if (scheduling === CampaignEmailScheduling.BusinessHours) {
+        return this.getNextBusinessHour();
+      }
+      // TODO
+      if (scheduling === CampaignEmailScheduling.SpecificTime) {
+        const json = emailNode.json as EmailCampaignNodeJson;
+        const specificTime = json?.specificTime || { hour: 11, minute: 30 };
+        const now = moment(this.getNow());
+        const scheduledTime = moment(now)
+          .hour(specificTime.hour)
+          .minute(specificTime.minute)
+          .second(0)
+          .millisecond(0);
 
-    return await super.getRunAt(campaignNode);
+        // If the specified time has already passed today, schedule for tomorrow
+        if (scheduledTime.isBefore(now)) {
+          scheduledTime.add(1, 'day');
+        }
+
+        return scheduledTime.toDate();
+      }
+    }
+    return this.getNow();
   }
   getTimeoutAt(campaignNode: AbstractCampaignNode) {
     invariant(
@@ -537,60 +541,6 @@ export class CampaignNodeEvaluator extends AbstractNodeEvaluator {
       audienceId,
       this.userId
     );
-  }
-  private async calculateDistributedTime(config: EmailCampaignNodeJson['distributionConfig']): Promise<Date> {
-    const baseTime = new Date();
-    const peakTime = new Date(baseTime);
-    peakTime.setHours(
-      config?.peakTime?.hour ?? 12,
-      config?.peakTime?.minute ?? 30,
-      0,
-      0
-    );
-
-    // Calculate hours difference from peak time
-    const hoursDiff = (baseTime.getTime() - peakTime.getTime()) / (1000 * 60 * 60);
-
-    // Use aggressiveness to determine standard deviation (inverse relationship)
-    const standardDeviation = 1 / (config?.aggressiveness ?? 1);
-
-    // Calculate Gaussian value (0 to 1)
-    const gaussian = Math.exp(-(Math.pow(hoursDiff, 2) / (2 * Math.pow(standardDeviation, 2))));
-
-    // Adjust time within business hours based on gaussian value
-    const adjustedTime = new Date(baseTime);
-    const adjustment = Math.floor(gaussian * 60); // Convert to minutes
-    adjustedTime.setMinutes(adjustedTime.getMinutes() + adjustment);
-
-    // Ensure we stay within business hours (9 AM to 5 PM)
-    const hour = adjustedTime.getHours();
-    if (hour < 9) {
-      adjustedTime.setHours(9, 0, 0, 0);
-    } else if (hour >= 17) {
-      adjustedTime.setDate(adjustedTime.getDate() + 1);
-      adjustedTime.setHours(9, 0, 0, 0);
-    }
-
-    return adjustedTime;
-  }
-  private calculateAggressiveness(audienceSize: number): number {
-    // Base aggressiveness on audience size with a max of 7.5
-    return Math.min(7.5, Math.log10(audienceSize) * 2);
-  }
-  private async saveDistributionConfig(campaignNode: EmailCampaignNode, json: EmailCampaignNodeJson): Promise<void> {
-    await this.#app.models.CampaignNode.update(
-      { json },
-      { where: { id: campaignNode.getId() } }
-    );
-  }
-  private async getAudienceSize(nodeId: string): Promise<number> {
-    const states = await this.#app.models.CampaignNodeState.findAll({
-      where: {
-        campaignNodeId: nodeId,
-        state: 'PENDING'
-      } as WhereOptions<CampaignNodeStateAttributes>
-    });
-    return states.length;
   }
 }
 

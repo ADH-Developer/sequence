@@ -2,7 +2,6 @@ import { Edge } from "./nodes";
 import AbstractCampaignNode from "./nodes/abstractCampaignNode";
 import AudienceCampaignNode from "./nodes/audienceCampaignNode";
 import TriggerCampaignNode from "./nodes/triggerCampaignNode";
-import { Model, ModelStatic } from "sequelize";
 
 type CampaignNodeID = string;
 type CampaignNodeEdgeId = string;
@@ -62,30 +61,11 @@ export type CustomEdge = {
 export type CampaignGraphEdges = Record<CampaignNodeEdgeId, Edge>;
 
 export interface EmailCampaignNodeJson {
-  emailId: string;
+  emailId?: string;
+  scheduling?: CampaignEmailScheduling;
   originalTemplateId?: string;
-  scheduling: CampaignEmailScheduling;
   specificTime?: {
     hour: number;
     minute: number;
   };
-  distributionConfig?: {
-    peakTime: {
-      hour: number;
-      minute: number;
-    };
-    aggressiveness: number;
-  };
-}
-
-export interface CampaignNodeStateAttributes {
-  id: string;
-  campaignNodeId: string;
-  productUserId: string;
-  state: string;
-  runAt: Date;
-  userId: string;
-  campaignId: string;
-  createdAt: Date;
-  updatedAt: Date;
 }

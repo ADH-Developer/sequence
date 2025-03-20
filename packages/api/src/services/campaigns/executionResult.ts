@@ -1,17 +1,20 @@
 export enum ExecutionResultEnum {
-  Continue = 'CONTINUE',
-  Stop = 'STOP',
-  Error = 'ERROR',
-  Reschedule = 'RESCHEDULE'
+  Continue = "Continue",
+  End = "End",
+  Error = "Error",
 }
 
 /**
  * Returned by a subclass of AbstractNodeExecutor in the execute function to
  * let the CampaignNodeEvaluator whether to proceed with campaign execution.
  */
-export default class ExecutionResult {
-  constructor(
-    public readonly type: ExecutionResultEnum,
-    public readonly payload?: any
-  ) { }
+class ExecutionResult {
+  result: ExecutionResultEnum;
+  data?: Record<string, any>;
+  constructor(result: ExecutionResultEnum, data?: Record<string, any>) {
+    this.result = result;
+    this.data = data;
+  }
 }
+
+export default ExecutionResult;

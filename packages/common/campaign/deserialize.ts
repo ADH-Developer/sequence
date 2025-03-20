@@ -104,7 +104,6 @@ export const serialize = (node: AbstractCampaignNode) => {
         emailId: emailNode.getEmailId(),
         scheduling: emailNode.getScheduling(),
         originalTemplateId: emailNode.getOriginalTemplateId(),
-        specificTime: emailNode.json?.specificTime,
       };
       return emailNode;
     case CampaignNodeKind.Filter:
