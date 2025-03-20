@@ -39,7 +39,7 @@ services:
       context: .
       dockerfile: Dockerfile.ui
       args:
-        NEXT_PUBLIC_API_URL: http://192.168.1.100:3000
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:3000}
     ports:
       - "8000:8000"
     container_name: sequence-ui
@@ -47,8 +47,8 @@ services:
       - frontend
     environment:
       PORT: 8000
-      NODE_ENV: production
-      NEXT_PUBLIC_API_URL: http://192.168.1.100:3000
+      NODE_ENV: ${NODE_ENV:-development}
+      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:3000}
     expose:
       - 8000
 networks:

@@ -1,0 +1,43 @@
+FROM node:16-alpine as base
+
+WORKDIR /app
+
+# Install system dependencies
+RUN apk add --no-cache libc6-compat
+
+# Install API package dependencies
+WORKDIR /app/packages/api
+COPY packages/api/package.json packages/api/yarn.lock ./
+RUN yarn install
+
+# Install common package dependencies
+WORKDIR /app/packages/common
+COPY packages/common/package.json packages/common/yarn.lock ./
+RUN yarn install
+
+FROM base as api-builder
+
+# Copy source code
+COPY /packages/api /app/packages/api
+COPY /packages/common /app/packages/common
+
+# Copy node_modules
+COPY --from=base /app/packages/api/node_modules ./node_modules
+COPY --from=base /app/packages/common/node_modules /app/packages/common/node_modules
+
+# Install additional dependencies
+RUN yarn add moment@2.29.4 invariant@2.2.4 @types/moment@2.13.0 @types/invariant@2.2.35
+
+# Build
+RUN yarn build && yarn install --prefer-offline
+
+FROM base as api
+
+WORKDIR /app/packages/api
+
+# Copy built files
+COPY --from=api-builder /app/packages/api/dist ./dist
+COPY --from=api-builder /app/packages/api/node_modules ./node_modules
+COPY --from=api-builder /app/packages/common /app/packages/common
+
+CMD ["node", "dist/server.js"] 

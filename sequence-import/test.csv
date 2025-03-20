@@ -1,0 +1,4 @@
+email_address,email_name,domain,desktop_score,mobile_score,batch_id,response
+test1@example.com,Test User 1,example.com,95,85,S123,true
+test2@example.com,Test User 2,example.com,75,65,S124,false
+test3@example.com,Test User 3,example.com,88,92,A125,true 

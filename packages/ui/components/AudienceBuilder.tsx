@@ -105,7 +105,7 @@ export type AudienceBuilderContextType = {
 
 export const AudienceBuilderContext =
   React.createContext<AudienceBuilderContextType>({
-    onChange: () => {},
+    onChange: () => { },
     editable: true,
   });
 
@@ -146,7 +146,7 @@ const AudienceBuilder = (props: Props) => {
     return true;
   };
 
-  const onChange = defaultProp(props.onChange, () => {});
+  const onChange = defaultProp(props.onChange, () => { });
   const internalOnChange = (): void => {
     if (props.validateOnBlur) {
       validate();
@@ -190,33 +190,41 @@ const AudienceBuilder = (props: Props) => {
           <RenderCondition
             node={rootNode}
             depth={0}
-            remove={() => {}}
+            remove={() => { }}
             errors={parseErrors}
           />
         </div>
         <div>
           {renderQueryButton && (
-            <BlueButton
-              text={
-                executeAudienceLoading ? (
-                  <>
-                    <CircularProgress
-                      size={14}
-                      color={"white" as any}
-                      style={{ marginRight: 2 }}
-                    />{" "}
-                    Query Users
-                  </>
-                ) : (
-                  "Query Users"
-                )
-              }
-              disabled={executeAudienceLoading}
-              style={{
-                marginLeft: 0,
-              }}
-              onClick={onClickExecuteAudience}
-            />
+            <div style={{ display: "flex", alignItems: "center" }}>
+              <BlueButton
+                text={
+                  executeAudienceLoading ? (
+                    <>
+                      <CircularProgress
+                        size={14}
+                        color={"white" as any}
+                        style={{ marginRight: 2 }}
+                      />{" "}
+                      Query Users
+                    </>
+                  ) : (
+                    "Query Users"
+                  )
+                }
+                disabled={executeAudienceLoading}
+                style={{
+                  marginLeft: 0,
+                  marginRight: 10
+                }}
+                onClick={onClickExecuteAudience}
+              />
+              {executeAudienceData?.executeAudience?.rows !== undefined && (
+                <span>
+                  {executeAudienceData.executeAudience.rows} user{executeAudienceData.executeAudience.rows !== 1 ? 's' : ''}
+                </span>
+              )}
+            </div>
           )}
         </div>
         {executeAudienceData?.executeAudience?.nodes && (

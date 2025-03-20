@@ -8,6 +8,7 @@ import {
   CampaignAudienceRules,
   CampaignEmailScheduling,
   CampaignNodeKind,
+  EmailCampaignNodeJson,
 } from "./types";
 
 interface SerializedCampaignNode {
@@ -29,11 +30,7 @@ export interface FilterCampaignNodeJson extends BaseAudienceCampaignNodeJson {
   waitValue: number;
 }
 
-export interface EmailCampaignNodeJson {
-  emailId?: string;
-  scheduling?: CampaignEmailScheduling;
-  originalTemplateId?: string;
-}
+export type { EmailCampaignNodeJson };
 
 export interface WaitCampaignNodeJson {
   days: number;
@@ -107,6 +104,7 @@ export const serialize = (node: AbstractCampaignNode) => {
         emailId: emailNode.getEmailId(),
         scheduling: emailNode.getScheduling(),
         originalTemplateId: emailNode.getOriginalTemplateId(),
+        specificTime: emailNode.json?.specificTime,
       };
       return emailNode;
     case CampaignNodeKind.Filter:

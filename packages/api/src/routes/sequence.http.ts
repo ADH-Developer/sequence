@@ -62,26 +62,34 @@ class SequenceHttpHandler {
     handler: (value: SequenceWebhook, body: any) => Promise<HttpResponse>
   ) {
     return async (request: Request, response: Response) => {
-      const webhook = await this.getSequenceWebhookForAuthToken(request);
-      if (!webhook) {
-        return response
-          .status(401)
-          .json({ success: false, error: "No webhook found for this token" });
-      }
       try {
-        logger.info("[Sequence:HTTP] Handling batch import");
-        const result = await handler(webhook, request.body);
-        return response.json(result);
-      } catch (error) {
-        if ((error as SequenceError).statusCode) {
-          const sequenceError = error as SequenceError;
+        const webhook = await this.getSequenceWebhookForAuthToken(request);
+        if (!webhook) {
           return response
-            .status(sequenceError.statusCode)
-            .json(sequenceError.payload);
+            .status(401)
+            .json({ success: false, error: "No webhook found for this token" });
         }
-        return response.status(500).json({
-          sucess: false,
-          message: (error as any).message,
+        try {
+          logger.info("[Sequence:HTTP] Handling batch import");
+          const result = await handler(webhook, request.body);
+          return response.json(result);
+        } catch (error) {
+          if ((error as SequenceError).statusCode) {
+            const sequenceError = error as SequenceError;
+            return response
+              .status(sequenceError.statusCode)
+              .json(sequenceError.payload);
+          }
+          return response.status(500).json({
+            sucess: false,
+            message: (error as any).message,
+          });
+        }
+      } catch (error) {
+        logger.error("[Sequence:HTTP] Authentication error:", error);
+        return response.status(401).json({
+          success: false,
+          error: "Invalid authentication credentials",
         });
       }
     };

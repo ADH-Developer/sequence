@@ -8,6 +8,8 @@ import {
 import { defaultProp } from "services/defaultProp";
 import styles from "./campaign.module.css";
 import classNames from "classnames";
+import { useEffect, useState } from "react";
+import { TextField } from "@material-ui/core";
 
 interface InnerProps {
   onClick: () => void;
@@ -99,39 +101,73 @@ const EmailScheduling = (props: InnerProps) => {
 interface Props {
   selected?: CampaignEmailScheduling;
   onClick?: (rule: CampaignEmailScheduling) => void;
+  onTimeChange?: (hour: number, minute: number) => void;
+  specificTime?: { hour: number; minute: number };
 }
 
 const RenderCampaignEmailScheduling = (props: Props) => {
-  const propsClick = defaultProp(props.onClick, () => {});
+  const propsClick = defaultProp(props.onClick, () => { });
   const selected = props.selected;
   const onClick = (rule: CampaignEmailScheduling) => () => propsClick(rule);
+  const [time, setTime] = useState(
+    props.specificTime ?
+      `${props.specificTime.hour.toString().padStart(2, '0')}:${props.specificTime.minute.toString().padStart(2, '0')}` :
+      "11:30"
+  );
+
+  const handleTimeChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setTime(event.target.value);
+    if (props.onTimeChange) {
+      const [hours, minutes] = event.target.value.split(':').map(Number);
+      props.onTimeChange(hours, minutes);
+    }
+  };
 
   return (
-    <div className={styles.audience_rules}>
-      <EmailScheduling
-        image={BlueClock}
-        onClick={onClick(CampaignEmailScheduling.Immediately)}
-        value={CampaignEmailScheduling.Immediately}
-        selected={selected}
-        title="IMMEDIATELY"
-        subtitle="Send the message immediately, be it afternoon or midnight."
-      />
-      <EmailScheduling
-        image={Sun}
-        onClick={onClick(CampaignEmailScheduling.BusinessHours)}
-        value={CampaignEmailScheduling.BusinessHours}
-        selected={selected}
-        title="BUSINESS HOURS"
-        subtitle="Send if during business hours, otherwise schedule it for the next business day."
-      />
-      <EmailScheduling
-        image={SpecificTime}
-        onClick={onClick(CampaignEmailScheduling.SpecificTime)}
-        value={CampaignEmailScheduling.SpecificTime}
-        selected={selected}
-        title="SPECIFIC TIME"
-        subtitle="Send at this specific time, scheduling for tomorrow if it’s passed."
-      />
+    <div>
+      <div className={styles.audience_rules}>
+        <EmailScheduling
+          image={BlueClock}
+          onClick={onClick(CampaignEmailScheduling.Immediately)}
+          value={CampaignEmailScheduling.Immediately}
+          selected={selected}
+          title="IMMEDIATELY"
+          subtitle="Send the message immediately, be it afternoon or midnight."
+        />
+        <EmailScheduling
+          image={Sun}
+          onClick={onClick(CampaignEmailScheduling.BusinessHours)}
+          value={CampaignEmailScheduling.BusinessHours}
+          selected={selected}
+          title="BUSINESS HOURS"
+          subtitle="Send if during business hours, otherwise schedule it for the next business day."
+        />
+        <EmailScheduling
+          image={SpecificTime}
+          onClick={onClick(CampaignEmailScheduling.SpecificTime)}
+          value={CampaignEmailScheduling.SpecificTime}
+          selected={selected}
+          title="SPECIFIC TIME"
+          subtitle="Send at this specific time, scheduling for tomorrow if it's passed."
+        />
+      </div>
+      {selected === CampaignEmailScheduling.SpecificTime && (
+        <div style={{ marginTop: '1em' }}>
+          <TextField
+            label="Select Time"
+            type="time"
+            value={time}
+            onChange={handleTimeChange}
+            InputLabelProps={{
+              shrink: true,
+            }}
+            inputProps={{
+              step: 300, // 5 min
+            }}
+            style={{ width: '200px' }}
+          />
+        </div>
+      )}
     </div>
   );
 };

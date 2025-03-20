@@ -77,6 +77,9 @@ const EmailInspector = (props: Props) => {
     useState<Option>();
   const [emailScheduling, setEmailScheduling] =
     useState<CampaignEmailScheduling>(props.node.getScheduling());
+  const [specificTime, setSpecificTime] = useState<{ hour: number; minute: number }>(
+    props.node.json?.specificTime || { hour: 11, minute: 30 }
+  );
   const [emailName, setEmailName] = useState<string>();
   const {
     data: emailsData,
@@ -173,10 +176,27 @@ const EmailInspector = (props: Props) => {
           emailId: email.id,
           originalTemplateId: selectedEmailTemplateOption?.value,
           scheduling: value,
+          specificTime: value === CampaignEmailScheduling.SpecificTime ? specificTime : undefined,
         } as EmailCampaignNodeJson,
       });
     },
-    [selectedEmailTemplateOption, email]
+    [selectedEmailTemplateOption, email, specificTime]
+  );
+
+  const onChangeSpecificTime = useCallback(
+    (hour: number, minute: number) => {
+      const newTime = { hour, minute };
+      setSpecificTime(newTime);
+      updateMutation.current({
+        json: {
+          emailId: email.id,
+          originalTemplateId: selectedEmailTemplateOption?.value,
+          scheduling: emailScheduling,
+          specificTime: newTime,
+        } as EmailCampaignNodeJson,
+      });
+    },
+    [selectedEmailTemplateOption, email, emailScheduling]
   );
 
   return (
@@ -225,6 +245,8 @@ const EmailInspector = (props: Props) => {
       <RenderCampaignEmailScheduling
         selected={emailScheduling}
         onClick={onChangeScheduling}
+        onTimeChange={onChangeSpecificTime}
+        specificTime={specificTime}
       />
     </InspectorSidebarBase>
   );

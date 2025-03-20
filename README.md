@@ -1,7 +1,131 @@
 # Sequence
 ![Cover Image](./docs/cover.png)
-Sequence is an open-core email marketing automation tool. 
 
+An open-core email marketing automation tool built with Next.js and Node.js.
+
+## Quick Start with Docker (Recommended)
+
+1. Clone the repository:
+```bash
+git clone https://github.com/sequence-so/sequence
+cd sequence
+```
+
+2. Configure Environment:
+   - For development:
+     ```bash
+     # In packages/ui/
+     cp .env.development .env
+     
+     # In packages/api/
+     cp .env.development .env
+     ```
+   
+   - For production:
+     ```bash
+     # In packages/ui/
+     cp .env.production .env
+     
+     # In packages/api/
+     cp .env.production .env
+     ```
+
+3. Start the application using Docker Compose:
+```bash
+docker compose up
+```
+
+The application will be available at:
+- UI: http://localhost:8000
+- API: http://localhost:3000
+
+## Environment Configuration
+
+### Development vs Production
+
+#### Development Mode
+- Uses `.env.development` settings
+- API URL defaults to `http://localhost:3000`
+- Debug logging enabled
+- Hot reloading enabled
+
+#### Production Mode
+- Uses `.env.production` settings
+- API URL should be set to your domain: `export NEXT_PUBLIC_API_URL=https://your-domain.com`
+- Set `export NODE_ENV=production`
+- Optimized builds and disabled development features
+
+### Environment Files
+The project uses multiple environment files:
+- `.env.development` - Development settings
+- `.env.production` - Production settings
+- `.env` - Active environment (copy either development or production)
+
+Key differences to note:
+```bash
+# Development (.env.development)
+NEXT_PUBLIC_API_URL=http://localhost:3000
+NEXT_PRIVATE_API_URL=http://api:3000
+
+# Production (.env.production)
+NEXT_PUBLIC_API_URL=https://your-domain.com  # Set via environment variable
+NEXT_PRIVATE_API_URL=http://api:3000         # Internal container communication
+```
+
+## Manual Setup
+
+### Requirements
+* Node.js ≥15.0.0
+* PostgreSQL ≥11
+* Redis
+
+### Environment Setup
+
+1. Install dependencies:
+```bash
+yarn install
+yarn bootstrap
+```
+
+2. Configure environment as described in Environment Configuration section
+
+### Development
+
+Start the development servers:
+```bash
+yarn dev
+```
+
+### Production
+
+For production deployment:
+```bash
+# Set production environment variables
+export NEXT_PUBLIC_API_URL=https://your-domain.com
+export NODE_ENV=production
+
+# Build and start containers
+docker compose up
+```
+
+## Environment Variables
+
+### UI Configuration
+- `PORT`: UI server port (default: 8000)
+- `NEXT_PUBLIC_API_URL`: Public API URL (default: http://localhost:3000)
+- `NEXT_PRIVATE_API_URL`: Internal API URL for container communication (default: http://api:3000)
+- `NODE_ENV`: Environment mode ('development' or 'production')
+
+### API Configuration
+- `PORT`: API server port (default: 3000)
+- `DB_USERNAME`: PostgreSQL username
+- `DB_PASSWORD`: PostgreSQL password
+- `DB_DATABASE`: PostgreSQL database name
+- `DB_HOST`: PostgreSQL host
+- `REDIS_URL`: Redis connection URL
+
+## Support
+For support, please reach out to `support@sequence.so`.
 
 ## Features
 ![Image of Sequence](./docs/.gitbook/assets/my-movie-4%20(1).gif)
@@ -11,22 +135,12 @@ Sequence is an open-core email marketing automation tool.
 - **Search and filter through customer data** from multiple sources (Segment, API, SDK, with Intercom and CSV coming soon)
 - **API first** with a GraphQL API and HTTP API
 
-## Quick Start
-
-Set up Sequence with **Docker Compose**:
-
-```
-./build/copy_env # Copy sample environment variables
-docker compose up
-```
-
-Open `http://0.0.0.0:8000` to see the application.
-
 ## **What's Next**
 
 [Read about importing data to begin using Sequence.](https://sequence.gitbook.io/sequence/node-sdk/node-sdk)
 
 [Read our Documentation here.](https://sequence.gitbook.io/sequence/node-sdk/node-sdk)
+
 ## Building Sequence
 
 **Requirements**
