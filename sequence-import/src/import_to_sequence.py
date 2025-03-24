@@ -14,7 +14,7 @@ from dotenv import load_dotenv
 
 
 class SequenceImporter:
-    def __init__(self, csv_path: str, batch_size: int = 100):
+    def __init__(self, csv_path: str, batch_size: int = 100, is_prod: bool = False):
         # Setup logging
         logging.basicConfig(
             level=logging.INFO,
@@ -32,7 +32,9 @@ class SequenceImporter:
         if not self.api_token:
             raise ValueError("SEQUENCE_API_TOKEN environment variable is required")
 
-        self.api_url = os.getenv("API_URL", "http://localhost:3000")
+        # Set API URL based on environment
+        base_url = "http://host.docker.internal:3000"
+        self.api_url = os.getenv("API_URL", base_url)
         self.log.info(f"Using API URL: {self.api_url}")
 
         # Setup API headers with properly encoded token
@@ -158,8 +160,13 @@ class SequenceImporter:
 
     def run(self):
         try:
-            # Read CSV file
-            df = pd.read_csv(self.csv_path)
+            # Read CSV file with explicit parameters
+            df = pd.read_csv(self.csv_path, encoding="utf-8", engine="python")
+
+            # Debug information
+            self.log.info(f"CSV columns found: {df.columns.tolist()}")
+            self.log.info(f"First row: {df.iloc[0].to_dict()}")
+
             total_records = len(df)
             self.log.info(f"Processing {total_records} records...")
 
@@ -205,9 +212,14 @@ def main():
         default=100,
         help="Number of records per batch (default: 100)",
     )
+    parser.add_argument(
+        "--prod",
+        action="store_true",
+        help="Use production environment (192.168.1.100:3000)",
+    )
     args = parser.parse_args()
 
-    importer = SequenceImporter(args.input, args.batch_size)
+    importer = SequenceImporter(args.input, args.batch_size, args.prod)
     importer.run()
 
 
