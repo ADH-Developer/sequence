@@ -23,6 +23,30 @@ docker compose up
 
 Open `http://0.0.0.0:8000` to see the application.
 
+### API Proxy Configuration
+
+Sequence uses a Next.js API proxy to handle all API communications. This setup:
+- Eliminates CORS issues
+- Simplifies environment configuration
+- Improves security by not exposing the API directly
+- Maintains authentication flow
+
+The proxy is automatically configured when using Docker Compose. The application will be available at:
+- UI: http://0.0.0.0:8000
+- API: http://0.0.0.0:3000 (internal only, proxied through Next.js)
+
+Key environment variables:
+```bash
+# Development
+NEXT_PUBLIC_API_URL=/api           # Public API endpoint (proxied)
+NEXT_PRIVATE_API_URL=http://api:3000  # Internal container communication
+DEV_UI_URL=http://localhost:8000   # Development UI URL
+
+# Production
+NEXT_PUBLIC_API_URL=/api           # Public API endpoint (proxied)
+NEXT_PRIVATE_API_URL=http://api:3000  # Internal container communication
+```
+
 If you'd like to run the application in development mode:
 
 ```text

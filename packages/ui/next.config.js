@@ -13,6 +13,14 @@ module.exports = withPlugins(
   ],
   {
     poweredByHeader: false,
+    async rewrites() {
+      return [
+        {
+          source: '/api/:path*',
+          destination: `${process.env.NEXT_PRIVATE_API_URL}/:path*`
+        }
+      ];
+    },
     webpack: (config, { isServer, dev, webpack }) => {
       config.module.rules.push({
         test: /\.(ts)?$/, // Just `tsx?` file only

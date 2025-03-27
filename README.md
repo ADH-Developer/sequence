@@ -38,7 +38,7 @@ cd sequence
 
 The application will be available at:
 - UI: http://localhost:8000
-- API: http://localhost:3000
+- API: http://localhost:3000 (internal only)
 
 ## Environment Configuration
 
@@ -46,14 +46,14 @@ The application will be available at:
 
 #### Development Mode
 - Uses `.env.development` settings
-- API URL defaults to `http://localhost:3000`
+- API requests are proxied through Next.js
 - Debug logging enabled
 - Hot reloading enabled
 - Start with: `docker compose up --build`
 
 #### Production Mode
 - Uses `.env.production` settings
-- API URL should be set to your domain
+- API requests are proxied through Next.js
 - Optimized builds and disabled development features
 - Start with: `NODE_ENV=production docker compose up --build`
 
@@ -75,13 +75,26 @@ cp .env.production .env
 Key environment variables:
 ```bash
 # Development (.env.development)
-NEXT_PUBLIC_API_URL=http://localhost:3000
-NEXT_PRIVATE_API_URL=http://api:3000
+NEXT_PUBLIC_API_URL=/api           # Public API endpoint (proxied)
+NEXT_PRIVATE_API_URL=http://api:3000  # Internal container communication
+DEV_UI_URL=http://localhost:8000   # Development UI URL
 
 # Production (.env.production)
-NEXT_PUBLIC_API_URL=http://your-domain.com  # Set to your actual domain
-NEXT_PRIVATE_API_URL=http://api:3000        # Internal container communication
+NEXT_PUBLIC_API_URL=/api           # Public API endpoint (proxied)
+NEXT_PRIVATE_API_URL=http://api:3000  # Internal container communication
 ```
+
+### API Proxy Configuration
+The application uses a Next.js API proxy to handle all API communications. This setup:
+- Eliminates CORS issues
+- Simplifies environment configuration
+- Improves security by not exposing the API directly
+- Maintains authentication flow
+
+The proxy is configured in:
+- `pages/api/graphql.ts` - Main GraphQL proxy endpoint
+- `next.config.js` - URL rewrite rules
+- `services/apollo.ts` - Apollo client configuration
 
 ## Manual Setup
 

@@ -15,11 +15,7 @@ services:
     environment:
       NODE_ENV: ${NODE_ENV:-development}
       PORT: 3000
-      DASHBOARD_URL: ${PROD_UI_URL:-http://192.168.1.100:8000}
-      DEV_UI_URL: ${DEV_UI_URL:-http://localhost:8000}
-      DEV_API_URL: ${DEV_API_URL:-http://localhost:3000}
-      PROD_UI_URL: ${PROD_UI_URL:-http://192.168.1.100:8000}
-      PROD_API_URL: ${PROD_API_URL:-http://192.168.1.100:3000}
+      DASHBOARD_URL: ${DEV_UI_URL:-http://localhost:8000}
   postgres:
     image: postgres:11
     networks:
@@ -47,23 +43,20 @@ services:
       context: .
       dockerfile: Dockerfile.ui
       args:
-        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://192.168.1.100:3000}
-        NEXT_PRIVATE_API_URL: ${NEXT_PRIVATE_API_URL:-http://api:3000/graphql}
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-/api}
+        NEXT_PRIVATE_API_URL: ${NEXT_PRIVATE_API_URL:-http://api:3000}
     ports:
       - "8000:8000"
     container_name: sequence-ui
     networks:
       - frontend
     environment:
-      PORT: 8000
       NODE_ENV: ${NODE_ENV:-development}
-      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://192.168.1.100:3000}
-      DEV_UI_URL: ${DEV_UI_URL:-http://localhost:8000}
-      DEV_API_URL: ${DEV_API_URL:-http://localhost:3000}
-      PROD_UI_URL: ${PROD_UI_URL:-http://192.168.1.100:8000}
-      PROD_API_URL: ${PROD_API_URL:-http://192.168.1.100:3000}
-    expose:
-      - 8000
+      PORT: 8000
+      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-/api}
+      NEXT_PRIVATE_API_URL: ${NEXT_PRIVATE_API_URL:-http://api:3000}
+    depends_on:
+      - api
 networks:
   frontend:
   backend:

@@ -14,8 +14,10 @@ type ServerParseError = Error & {
 };
 
 const httpLink = createHttpLink({
-  uri: '/api/graphql',
-  credentials: 'same-origin'
+  fetch: (_, options) => {
+    let url = `${process.env.NEXT_PUBLIC_API_URL}/graphql`;
+    return fetch(url, options);
+  },
 });
 
 const logout = () => {
@@ -59,7 +61,7 @@ const authLink = new ApolloLink((operation, forward) => {
         return;
       }
       token = localStorage.token;
-    } catch (error) { }
+    } catch (error) {}
 
     // get the authentication token from local storage if it exists
     // return the headers to the context so httpLink can read them
