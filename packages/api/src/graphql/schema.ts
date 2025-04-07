@@ -424,11 +424,16 @@ const typeDefs = gql`
     deleteProductUser(customerId: String, id: ID): DeleteResult
     executeAudience(audience: String): PaginatedProductUser
     launchCampaign(id: ID!): Campaign
-    sendTestEmail(emailId: ID!, to: String!): OperationResult
+    sendTestEmail(
+      emailId: ID!
+      to: String!
+      currentSubject: String
+      currentBodyHtml: String
+    ): OperationResult
     stopCampaign(id: ID!): Campaign
     updateAudience(
       id: ID!
-      name: String
+      name: String!
       node: String
       localTo: String
     ): Audience

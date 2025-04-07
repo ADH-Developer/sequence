@@ -60,6 +60,12 @@ Audience.init(
     },
     name: {
       type: STRING,
+      allowNull: false,
+      validate: {
+        notEmpty: {
+          msg: "Audience name is required"
+        }
+      }
     },
     node: {
       type: JSON,

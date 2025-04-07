@@ -4,20 +4,27 @@ import SequelizeConfig from "./config/config";
 declare type ENVIRONMENT = "test" | "development" | "production";
 
 const options: SequelizeOptions = {
-  dialectOptions: process.env.DB_SSL
+  dialectOptions: process.env.DB_SSL === "true"
     ? {
       ssl: {
         require: true,
         rejectUnauthorized: false,
       },
     }
-    : {},
+    : undefined,
   logging: process.env.DB_LOGGING === "true" ? console.log : false,
 };
 
-const config =
-  SequelizeConfig[process.env.NODE_ENV as ENVIRONMENT] ||
-  SequelizeConfig.development;
+const config = {
+  url: process.env.DB_URL,
+  username: process.env.DB_USER,
+  password: process.env.DB_PASSWORD,
+  database: process.env.DB_NAME,
+  host: process.env.DB_HOST,
+  port: parseInt(process.env.DB_PORT || "5432"),
+  dialect: "postgres",
+  ...options
+};
 
 export const dbConfig = config;
 
@@ -26,19 +33,17 @@ const createSequelize = (...args: any[]) => {
   instance
     .authenticate()
     .then(() => console.log("Sequence: database connection successful"))
-    .catch(() => {
-      console.log(
-        `Environment variable DB_SSL=true required to connect to this database.`
-      );
+    .catch((error) => {
+      console.error("Failed to connect to database:", error.message);
     });
   return instance;
 };
 
 let sequelize: Sequelize;
-if (dbConfig.url) {
-  sequelize = createSequelize(dbConfig.url, { ...(config as any), ...options });
+if (config.url) {
+  sequelize = createSequelize(config.url, { ...config, ...options });
 } else {
-  sequelize = createSequelize({ ...(config as any), ...options });
+  sequelize = createSequelize({ ...config, ...options });
 }
 
 export default sequelize;

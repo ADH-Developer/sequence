@@ -76,7 +76,8 @@ class CampaignCronJob extends CronJob {
     const promises = this.evaluatorCache
       .keys()
       .map((k) => this.evaluatorCache.get(k))
-      .map((evaluator: CampaignNodeEvaluator) => evaluator.build());
+      .filter((evaluator): evaluator is CampaignNodeEvaluator => evaluator !== undefined)
+      .map((evaluator) => evaluator.build());
     return Promise.all(promises);
   }
 }

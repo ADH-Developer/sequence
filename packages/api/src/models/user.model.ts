@@ -2,7 +2,7 @@ import { InitOptions, Optional, STRING, UUID } from "sequelize";
 import { Model } from "sequelize-typescript";
 import sequelize from "../database";
 import { v4 as uuidv4 } from "uuid";
-import { hash } from "src/utils/password";
+import { hash } from "../utils/password";
 import { DATE } from "sequelize";
 
 const config: InitOptions = {

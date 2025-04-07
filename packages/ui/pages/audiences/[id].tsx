@@ -1,7 +1,7 @@
 import dynamic from "next/dynamic";
 import { useRouter } from "next/router";
 import { useEffect, useRef, useState } from "react";
-import { useQuery } from "@apollo/client";
+import { useQuery, useMutation } from "@apollo/client";
 import { CircularProgress } from "@material-ui/core";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faUserFriends } from "@fortawesome/free-solid-svg-icons";
@@ -12,7 +12,7 @@ import DefaultViewLayout from "layout/DefaultViewLayout";
 import AudienceBuilder from "components/AudienceBuilder";
 import { Condition, deserialize } from "common/filters";
 import { PAGE_DEFAULTS } from "constants/page";
-import { GET_AUDIENCE_WITH_PRODUCT_USERS } from "components/audience/AudienceQueries";
+import { GET_AUDIENCE_WITH_PRODUCT_USERS, UPDATE_AUDIENCE } from "components/audience/AudienceQueries";
 
 const AudienceByIdPage = () => {
   const router = useRouter();
@@ -25,6 +25,7 @@ const AudienceByIdPage = () => {
       setTitle(data.audiences.nodes[0].name);
     },
   });
+  const [updateAudience] = useMutation(UPDATE_AUDIENCE);
   const nodeRef = useRef<Condition>();
 
   useEffect(() => {
@@ -37,9 +38,23 @@ const AudienceByIdPage = () => {
     nodeRef.current = deserializedNode;
   }, [data?.audiences.nodes[0]]);
 
-  const onChangeTitleText = (text: string) => {
+  const onChangeTitleText = async (text: string) => {
     setTitle(text);
+    if (router.query.id) {
+      try {
+        await updateAudience({
+          variables: {
+            id: router.query.id,
+            name: text,
+            node: data?.audiences.nodes[0].node
+          }
+        });
+      } catch (error) {
+        console.error("Failed to update audience name:", error);
+      }
+    }
   };
+
   const content =
     loading || !nodeRef.current ? (
       <CircularProgress />

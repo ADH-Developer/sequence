@@ -19,4 +19,6 @@ export interface SendTestEmail {
 export interface SendTestEmailVariables {
   emailId: string;
   to: string;
+  currentSubject: string;
+  currentBodyHtml: string;
 }

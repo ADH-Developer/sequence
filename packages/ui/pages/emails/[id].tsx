@@ -54,9 +54,9 @@ const EmailsByIdPage = () => {
         <DynamicTitleBar
           title={title}
           onChangeTitleText={onChangeTitleText}
-          subtitle={PAGE_DEFAULTS.emails.id.subtitle}
+          subtitle="Create an email to send to a list of customers."
           showAction={false}
-          placeholderTitle={PAGE_DEFAULTS.emails.id.placeholder}
+          placeholderTitle="Untitled Email"
           icon={<FontAwesomeIcon icon={faEnvelope} color={"#4a7da7"} />}
         ></DynamicTitleBar>
         <DefaultViewLayout>

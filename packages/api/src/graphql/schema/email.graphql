@@ -1,0 +1,32 @@
+type Mutation {
+  createEmail(
+    name: String
+    bodyHtml: String
+    bodyText: String
+    subject: String
+    from: String
+    fromName: String
+    localTo: String
+  ): Email
+  updateEmail(
+    id: ID!
+    name: String
+    bodyHtml: String
+    bodyText: String
+    subject: String
+    from: String
+    fromName: String
+    kind: String
+  ): Email
+  deleteEmail(id: ID!): DeleteEmailResponse
+  sendTestEmail(
+    emailId: ID!
+    to: String!
+    currentSubject: String!
+    currentBodyHtml: String!
+  ): SendTestEmailResponse
+}
+
+type SendTestEmailResponse {
+  success: Boolean!
+} 

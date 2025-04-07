@@ -100,6 +100,21 @@ export const EmailEditorInner = (props: EmailEditorInnerProps) => {
     });
   }, [props.email]);
 
+  const onChangeName = (text: string) => {
+    setEmailName(text);
+    props.onChangeName(text);
+    debouncedUpdate.current({
+      variables: {
+        id: props.email.id,
+        name: text,
+        bodyHtml: html,
+        bodyText: "",
+        subject,
+        kind: emailKind,
+      },
+    });
+  };
+
   const onDeleteEmail = () => {
     deleteEmail({
       variables: {
@@ -219,7 +234,11 @@ export const EmailEditorInner = (props: EmailEditorInnerProps) => {
             isSaving={updateEmailLoading}
           />
           <div className="align-right">
-            <TestEmailButton emailId={props.email.id} />
+            <TestEmailButton
+              emailId={props.email.id}
+              currentSubject={subject}
+              currentBodyHtml={html}
+            />
             {emailKind === "code" && <PreviewCodeEmailButton html={html} />}
 
             {renderDeleteEmail && (

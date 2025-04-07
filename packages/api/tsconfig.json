@@ -15,7 +15,8 @@
     ],
     "types": [
       "node",
-      "mocha"
+      "mocha",
+      "jest"
     ],
     "allowJs": true,
     "checkJs": false,

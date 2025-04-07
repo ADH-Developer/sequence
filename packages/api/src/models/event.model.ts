@@ -5,7 +5,7 @@ import User from "./user.model";
 import { v4 as uuidv4 } from "uuid";
 import { EventContext } from "sequence-node";
 import ProductUser from "./productUser.model";
-import { productUserSaved } from "src/events/productUserSaved.event";
+import { productUserSaved } from "../events/productUserSaved.event";
 
 const config: InitOptions = {
   tableName: "events",

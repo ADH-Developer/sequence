@@ -122,9 +122,16 @@ export const DELETE_EMAIL = gql`
 `;
 
 export const SEND_TEST_EMAIL = gql`
-  mutation SendTestEmail($emailId: ID!, $to: String!) {
-    sendTestEmail(emailId: $emailId, to: $to) {
+  mutation SendTestEmail($emailId: ID!, $to: String!, $currentSubject: String!, $currentBodyHtml: String!) {
+    sendTestEmail(emailId: $emailId, to: $to, currentSubject: $currentSubject, currentBodyHtml: $currentBodyHtml) {
       success
     }
   }
 `;
+
+export interface SendTestEmailVariables {
+  emailId: string;
+  to: string;
+  currentSubject: string;
+  currentBodyHtml: string;
+}

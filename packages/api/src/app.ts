@@ -22,6 +22,8 @@ import QueueService, { QueueServiceOptions } from "./queue/queueService";
 import { createNamespace, Namespace } from "continuation-local-storage";
 import Repositories from "./repositories";
 import EmailService from "./services/email/emailService";
+import { SendEmail } from "./services/email/sendEmail";
+import { EmailMonitoring } from "./services/email/emailMonitoring";
 import SequenceError, { HTTP_UNAUTHORIZED } from "./error/sequenceError";
 import { basicAuthentication } from "./auth/basic.auth";
 import { GraphQLContextType } from "./graphql";
@@ -40,15 +42,6 @@ export interface AppOptions {
    */
   queue?: QueueServiceOptions;
   email?: {
-    sendgrid?: {
-      fromAddress: string;
-      apiKey: string;
-    };
-    mailgun?: {
-      fromAddress: string;
-      apiKey: string;
-      domain: string;
-    };
     smtp?: {
       host: string;
       port: number;
@@ -58,6 +51,30 @@ export interface AppOptions {
         pass: string;
       };
       fromAddress: string;
+    };
+    sendgrid?: {
+      fromAddress: string;
+      apiKey: string;
+    };
+    mailgun?: {
+      fromAddress: string;
+      apiKey: string;
+      domain: string;
+    };
+    throttler?: {
+      maxConcurrent?: number;
+      minTime?: number;
+      reservoir?: number;
+      reservoirRefreshAmount?: number;
+      reservoirRefreshInterval?: number;
+    };
+    monitoring?: {
+      alertThresholds: {
+        errorRate: number;
+        queueSize: number;
+        dropRate: number;
+      };
+      checkInterval: number;
     };
   };
 }
@@ -93,6 +110,18 @@ class App {
     this.bootApolloServer();
     // this.bootQueue(options?.queue);
     this.bootEmail(options?.email);
+    // Initialize email throttler
+    SendEmail.initializeThrottler(options?.email?.throttler);
+    // Initialize email monitoring
+    const monitoring = EmailMonitoring.getInstance({
+      alertThresholds: {
+        errorRate: options?.email?.monitoring?.alertThresholds?.errorRate ?? 5,
+        queueSize: options?.email?.monitoring?.alertThresholds?.queueSize ?? 100,
+        dropRate: options?.email?.monitoring?.alertThresholds?.dropRate ?? 10,
+      },
+      checkInterval: options?.email?.monitoring?.checkInterval ?? 60000,
+    });
+    monitoring.start();
     // @ts-ignore
     database.app = this;
   }
@@ -233,32 +262,42 @@ class App {
       app.use(enforce.HTTPS({ trustProtoHeader: true }));
     }
 
+    // Configure CORS
     const corsOptions = {
       origin: [
         process.env.DASHBOARD_URL,
         process.env.NODE_ENV === "development" ? process.env.DEV_UI_URL : null,
         process.env.NODE_ENV === "development" ? process.env.DEV_API_URL : null,
         process.env.NODE_ENV === "production" ? process.env.PROD_UI_URL : null,
-        process.env.NODE_ENV === "production" ? process.env.PROD_API_URL : null
+        process.env.NODE_ENV === "production" ? process.env.PROD_API_URL : null,
+        "http://localhost:8000",
+        "http://localhost:3000"
       ].filter(Boolean),
       credentials: true,
+      methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+      allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
     };
 
     app.use(cors(corsOptions));
     app.options("*", cors(corsOptions));
 
+    // Configure body parsing
+    app.use(express.json({ limit: '50mb' }));
+    app.use(express.urlencoded({ extended: true, limit: '50mb' }));
+
+    // Configure cookies and session
     app.use(cookieParser(process.env.JWT_SECRET_KEY));
-    app.use(express.json());
-    app.use(
-      express.urlencoded({
-        extended: true,
-      })
-    );
     app.use(
       session({
         secret: process.env.ENCRYPTION_KEY,
-        resave: true,
-        saveUninitialized: true,
+        resave: false,
+        saveUninitialized: false,
+        cookie: {
+          secure: process.env.NODE_ENV === 'production',
+          httpOnly: true,
+          sameSite: 'lax',
+          maxAge: 24 * 60 * 60 * 1000 // 24 hours
+        }
       })
     );
   }

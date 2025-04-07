@@ -77,6 +77,8 @@ export const deleteEmail = async (
 interface SendTestEmailArgs {
   emailId: string;
   to: string;
+  currentSubject?: string;
+  currentBodyHtml?: string;
 }
 
 export const sendTestEmail = async (
@@ -98,11 +100,43 @@ export const sendTestEmail = async (
     throw new SequenceError("No email found", MODEL_NOT_FOUND);
   }
 
+  // Look up user by email
+  const productUser = await models.ProductUser.findOne({
+    where: {
+      email: args.to,
+    },
+  });
+
+  // Create mock user data if no user found
+  const mockUser = {
+    email: args.to,
+    firstName: "Test",
+    lastName: "User",
+    domain: "example.com",
+    traits: {
+      desktop_score: "desktop_score",
+      mobile_score: "mobile_score",
+      batch_id: "batch_id",
+      has_response: "has_response"
+    }
+  };
+
   const sendEmail = new SendEmail();
+
+  // Update the email instance with new subject and body if provided
+  if (args.currentSubject) {
+    email.subject = args.currentSubject;
+  }
+  if (args.currentBodyHtml) {
+    email.bodyHtml = args.currentBodyHtml;
+  }
+
   sendEmail
     .setProvider(app.getEmail().getProvider())
     .setEmail(email)
-    .setToAddress(args.to);
+    .setToAddress(args.to)
+    .setProductUser(productUser || mockUser);
+
   await sendEmail.send();
 
   return { success: true };

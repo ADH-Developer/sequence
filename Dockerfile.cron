@@ -1,0 +1,39 @@
+# Use Node 18 Alpine as base image
+FROM node:18-alpine
+
+# Install system dependencies
+RUN apk add --no-cache libc6-compat
+
+# Set working directory
+WORKDIR /app
+
+# Copy package files
+COPY packages/api/package.json ./packages/api/
+COPY packages/common/package.json ./packages/common/
+COPY package.json yarn.lock ./
+
+# Install dependencies (including dev dependencies)
+RUN yarn install
+
+# Install ts-node-dev and typescript globally
+RUN yarn global add ts-node-dev typescript tsconfig-paths
+
+# Copy source code
+COPY packages/api ./packages/api
+COPY packages/common ./packages/common
+
+# Set environment variables
+ENV NODE_ENV=development
+ENV PORT=3001
+
+# Change to API directory where the cron script is located
+WORKDIR /app/packages/api
+
+# Add global yarn bin to PATH
+ENV PATH="/usr/local/share/.config/yarn/global/node_modules/.bin:${PATH}"
+
+# Expose port (if needed for health checks)
+EXPOSE 3001
+
+# Command to run the cron daemon in development mode
+CMD ["yarn", "cron"] 

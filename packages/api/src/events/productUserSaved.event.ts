@@ -1,6 +1,6 @@
-import App from "src/app";
-import ProductUser from "src/models/productUser.model";
-import CampaignNodeEvaluator from "src/services/campaigns/campaignNodeEvaluator";
+import App from "../app";
+import ProductUser from "../models/productUser.model";
+import CampaignNodeEvaluator from "../services/campaigns/campaignNodeEvaluator";
 
 /**
  * When a ProductUser is saved, we need to evaluate if it should be added to a campaign.

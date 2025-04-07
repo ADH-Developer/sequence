@@ -9,13 +9,77 @@ services:
     container_name: sequence-api
     depends_on:
       - postgres
+      - redis
     networks:
       - backend
       - frontend
     environment:
-      NODE_ENV: ${NODE_ENV:-development}
+      NODE_ENV: development
       PORT: 3000
       DASHBOARD_URL: ${DEV_UI_URL:-http://localhost:8000}
+      DB_SSL: "false"
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_USER: docker
+      DB_PASSWORD: docker
+      DB_NAME: sequence
+      DB_URL: postgres://docker:docker@postgres:5432/sequence
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_URL: redis://redis:6379
+      ENCRYPTION_KEY: ${ENCRYPTION_KEY:-your-secret-key-here}
+      LOGIN_REDIRECT: ${LOGIN_REDIRECT:-http://localhost:8000}
+      JWT_SECRET_KEY: ${JWT_SECRET_KEY:-your-jwt-secret-key}
+      JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-7d}
+      JWT_COOKIE_NAME: ${JWT_COOKIE_NAME:-jwt}
+      JWT_COOKIE_SECURE: ${JWT_COOKIE_SECURE:-false}
+      JWT_COOKIE_HTTP_ONLY: ${JWT_COOKIE_HTTP_ONLY:-true}
+      JWT_COOKIE_SAME_SITE: ${JWT_COOKIE_SAME_SITE:-lax}
+      # SMTP Configuration
+      SMTP_HOST: smtppro.zoho.com
+      SMTP_PORT: 465
+      SMTP_SECURE: "true"
+      SMTP_USER: andrew@cgdigitalservices.com
+      SMTP_PASS: ".uEr#3kmaVd@aXV"
+      FROM_ADDRESS: andrew@cgdigitalservices.com
+    volumes:
+      - ./packages/api:/app/packages/api
+      - ./packages/common:/app/packages/common
+  cron:
+    build:
+      context: .
+      dockerfile: Dockerfile.cron
+    container_name: sequence-cron
+    depends_on:
+      - postgres
+      - redis
+    networks:
+      - backend
+    environment:
+      NODE_ENV: development
+      PORT: 3001
+      DASHBOARD_URL: ${DEV_UI_URL:-http://localhost:8000}
+      DB_SSL: "false"
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_USER: docker
+      DB_PASSWORD: docker
+      DB_NAME: sequence
+      DB_URL: postgres://docker:docker@postgres:5432/sequence
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_URL: redis://redis:6379
+      ENCRYPTION_KEY: ${ENCRYPTION_KEY:-your-secret-key-here}
+      # SMTP Configuration
+      SMTP_HOST: smtppro.zoho.com
+      SMTP_PORT: 465
+      SMTP_SECURE: "true"
+      SMTP_USER: andrew@cgdigitalservices.com
+      SMTP_PASS: ".uEr#3kmaVd@aXV"
+      FROM_ADDRESS: andrew@cgdigitalservices.com
+    volumes:
+      - ./packages/api:/app/packages/api
+      - ./packages/common:/app/packages/common
   postgres:
     image: postgres:11
     networks:
@@ -38,6 +102,8 @@ services:
       - "6379:6379"
     expose:
       - 6379
+    volumes:
+      - redis_data:/data
   ui:
     build:
       context: .
@@ -50,6 +116,7 @@ services:
     container_name: sequence-ui
     networks:
       - frontend
+      - backend
     environment:
       NODE_ENV: ${NODE_ENV:-development}
       PORT: 8000
@@ -62,3 +129,4 @@ networks:
   backend:
 volumes:
   postgres_data:
+  redis_data:

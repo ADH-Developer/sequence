@@ -47,6 +47,10 @@ export const createAudience = async (
   const parseErrors: NodeParseError[] = [];
   let builder: AudienceBuilder;
 
+  if (!args.name || args.name.trim() === "") {
+    throw new SequenceError("Audience name is required", 422);
+  }
+
   try {
     parsed = JSON.parse(args.node);
   } catch (error) {
@@ -93,6 +97,10 @@ export const updateAudience = async (
   const id = args.id;
   let audience: Audience;
 
+  if (!args.name || args.name.trim() === "") {
+    throw new SequenceError("Audience name is required", 422);
+  }
+
   audience = await models.Audience.findOne({
     where: {
       userId: user.id,
@@ -106,5 +114,13 @@ export const updateAudience = async (
 
   const updateArgs = { ...args };
   delete updateArgs.id;
-  return await audience.update(updateArgs);
+
+  try {
+    return await audience.update(updateArgs);
+  } catch (error) {
+    if (error.name === 'SequelizeValidationError') {
+      throw new SequenceError("Audience name is required", 422);
+    }
+    throw error;
+  }
 };
