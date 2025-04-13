@@ -13,7 +13,7 @@ COPY packages/common/package.json packages/common/yarn.lock ./packages/common/
 RUN yarn install --frozen-lockfile
 
 # Install development tools
-RUN yarn global add ts-node-dev typescript tsconfig-paths concurrently
+RUN yarn global add ts-node-dev typescript concurrently
 
 # Copy source code
 COPY . .
