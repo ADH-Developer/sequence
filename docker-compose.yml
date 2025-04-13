@@ -120,8 +120,10 @@ services:
     environment:
       NODE_ENV: ${NODE_ENV:-development}
       PORT: 8000
-      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-/api}
-      NEXT_PRIVATE_API_URL: ${NEXT_PRIVATE_API_URL:-http://api:3000}
+      NEXT_PUBLIC_API_URL: /api
+      NEXT_PRIVATE_API_URL: http://api:3000
+      DEV_UI_URL: ${DEV_UI_URL:-http://localhost:8000}
+      LOGIN_REDIRECT: ${LOGIN_REDIRECT:-http://localhost:8000}
     depends_on:
       - api
 networks:
