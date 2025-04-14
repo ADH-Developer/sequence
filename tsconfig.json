@@ -9,21 +9,53 @@
     "experimentalDecorators": true,
     "target": "es6",
     "sourceMap": true,
-    "lib": ["es2018"],
+    "lib": [
+      "es2018",
+      "dom"
+    ],
+    "types": [
+      "node",
+      "jest",
+      "mocha"
+    ],
     "paths": {
-      "api": ["../api"],
-      "api/*": ["../api/*"],
-      "common": ["../"],
-      "common/*": ["../common/*"],
-      "ui": ["../ui"],
-      "ui/*": ["../ui/*"]
+      "api": [
+        "../api"
+      ],
+      "api/*": [
+        "../api/*"
+      ],
+      "common": [
+        "../"
+      ],
+      "common/*": [
+        "../common/*"
+      ],
+      "ui": [
+        "../ui"
+      ],
+      "ui/*": [
+        "../ui/*"
+      ]
     },
-    "typeRoots": ["./node_modules/@types", "../../node_modules/@types"]
+    "typeRoots": [
+      "./node_modules/@types",
+      "../../node_modules/@types"
+    ]
   },
-  "exclude": ["node_modules", "**/*.spec.ts"],
+  "exclude": [
+    "node_modules",
+    "**/*.spec.ts"
+  ],
   "references": [
-    { "path": "./packages/common" },
-    { "path": "./packages/api" },
-    { "path": "./packages/ui" }
+    {
+      "path": "./packages/common"
+    },
+    {
+      "path": "./packages/api"
+    },
+    {
+      "path": "./packages/ui"
+    }
   ]
 }

@@ -12,8 +12,9 @@ COPY packages/common/package.json packages/common/yarn.lock ./packages/common/
 # Install dependencies including dev dependencies
 RUN yarn install --frozen-lockfile
 
-# Install development tools in the project directory
-RUN yarn add -D ts-node-dev tsconfig-paths typescript concurrently
+# Install development tools and type definitions
+RUN yarn add -D ts-node-dev tsconfig-paths typescript concurrently && \
+    yarn add -D @types/node @types/express @types/cookie-parser @types/cors @types/express-session @types/express-sslify @types/graphql @types/continuation-local-storage @types/dotenv @types/jest @types/mocha
 
 # Copy source code
 COPY . .
