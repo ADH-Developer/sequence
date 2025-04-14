@@ -9,8 +9,8 @@ COPY package.json yarn.lock lerna.json ./
 COPY packages/api/package.json packages/api/yarn.lock ./packages/api/
 COPY packages/common/package.json packages/common/yarn.lock ./packages/common/
 
-# Install dependencies including dev dependencies
-RUN yarn install --frozen-lockfile
+# Install dependencies
+RUN yarn install
 
 # Install development tools and type definitions
 RUN yarn add -D ts-node-dev tsconfig-paths typescript concurrently && \
