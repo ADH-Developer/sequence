@@ -1,5 +1,5 @@
 FROM node:18-alpine
-WORKDIR /app
+WORKDIR /sequence
 
 # Install system dependencies
 RUN apk add --no-cache libc6-compat
@@ -12,8 +12,8 @@ COPY packages/common/package.json packages/common/yarn.lock ./packages/common/
 # Install dependencies including dev dependencies
 RUN yarn install --frozen-lockfile
 
-# Install development tools
-RUN yarn global add ts-node-dev typescript concurrently
+# Install development tools in the project directory
+RUN yarn add -D ts-node-dev tsconfig-paths typescript concurrently
 
 # Copy source code
 COPY . .
@@ -21,10 +21,11 @@ COPY . .
 # Set environment variables
 ENV NODE_ENV=development
 ENV PORT=3000
-ENV PATH="/app/node_modules/.bin:${PATH}"
+ENV PATH="/sequence/node_modules/.bin:${PATH}"
+ENV NODE_PATH=/sequence/node_modules
 
 EXPOSE 3000
 
 # Start the application
-WORKDIR /app/packages/api
+WORKDIR /sequence/packages/api
 CMD ["yarn", "dev"] 
